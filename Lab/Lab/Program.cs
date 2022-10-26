@@ -12,6 +12,7 @@ namespace Lab
         {
             Maze maze = new Maze(20);
 
+            maze.generate_maze();
             maze.draw_maze();
 
             Console.ReadLine();

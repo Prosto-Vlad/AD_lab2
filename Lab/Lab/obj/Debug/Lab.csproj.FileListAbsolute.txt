@@ -5,3 +5,4 @@ D:\Visual Projects\AD_lab2\Lab\Lab\obj\Debug\Lab.csproj.AssemblyReference.cache
 D:\Visual Projects\AD_lab2\Lab\Lab\obj\Debug\Lab.csproj.CoreCompileInputs.cache
 D:\Visual Projects\AD_lab2\Lab\Lab\obj\Debug\Lab.exe
 D:\Visual Projects\AD_lab2\Lab\Lab\obj\Debug\Lab.pdb
+D:\Visual Projects\AD_lab2\Lab\Lab\obj\Debug\Lab.csproj.SuggestedBindingRedirects.cache

@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
+
 
 namespace Lab
 {
@@ -27,7 +30,7 @@ namespace Lab
         public Node[,] maze;
 
         int size;
-        string[] side = { "t", "r", "b", "l"};
+        //string[] side = { "t", "r", "b", "l"};
 
         public Maze(int size)
         {
@@ -67,9 +70,9 @@ namespace Lab
         {
             List<Node> neighbours = new List<Node>();
             int[] cord_t = new int[2] { y_cur - 1, x_cur };
-            int[] cord_l = new int[2] { y_cur, x_cur+1 };
+            int[] cord_l = new int[2] { y_cur, x_cur - 1 };
             int[] cord_b = new int[2] { y_cur + 1, x_cur };
-            int[] cord_r = new int[2] { y_cur, x_cur-1};
+            int[] cord_r = new int[2] { y_cur, x_cur + 1};
 
             List<int[]> temp = new List<int[]>() { cord_t, cord_l, cord_b, cord_r };
 
@@ -79,7 +82,7 @@ namespace Lab
                 {
                     if (maze[temp[i][0], temp[i][1]].wached == false)
                     {
-                        maze[temp[i][0], temp[i][1]].wached = true;
+                        //maze[temp[i][0], temp[i][1]].wached = true;
                         neighbours.Add(maze[temp[i][0], temp[i][1]]);
                     }
                 }
@@ -108,7 +111,7 @@ namespace Lab
                 maze[sec.corde[0], sec.corde[1]].left = false;
                 return;
             }
-            if (fir.corde[0] < sec.corde[0])
+            if (fir.corde[1] > sec.corde[1])
             {
                 maze[fir.corde[0], fir.corde[1]].left = false;
                 maze[sec.corde[0], sec.corde[1]].right = false;
@@ -121,25 +124,38 @@ namespace Lab
             Stack<Node> node_stack = new Stack<Node>();
 
             Node current = start;
+            start.wached = true;
             Node neighbour_node;
-            int unwached = size;
-            int x = 0, y = 0;
+            int unwached = size*size;
+            Random rand = new Random();
 
             while (unwached != 0)
             {
                 List<Node> neighbours = get_neighbours( current.corde[0], current.corde[1]);
-
-                if(neighbours.Count != 0)
+                if (neighbours.Count != 0)
                 {
-                    Random rand = new Random();
-                    maze[current.corde[0], current.corde[1]].wached = true;
-                    unwached--;
-                    neighbour_node = neighbours[rand.Next(0, neighbours.Count-1)];
+                    if (current.corde[0] == finish.corde[0] && current.corde[1] == finish.corde[1])
+                    {
+                        maze[current.corde[0], current.corde[1]].wached = true;
+                        unwached--;
+                        current = node_stack.Pop();
+                    }
+                    else
+                    {
+                        int index = rand.Next(neighbours.Count);
+                        neighbour_node = neighbours[index];
+                        maze[neighbour_node.corde[0], neighbour_node.corde[1]].wached = true;
+                        unwached--;
 
-                    dell_wall(current, neighbour_node);
+                        dell_wall(current, neighbour_node);
 
-                    node_stack.Push(current);
-                    current = neighbour_node;
+                        node_stack.Push(current);
+                        current = neighbour_node;
+                    }
+                }
+                else if(node_stack.Count > 0)
+                {
+                    current = node_stack.Pop();
                 }
             }
 
