@@ -15,6 +15,9 @@ namespace Lab
             maze.generate_maze();
             maze.draw_maze();
 
+            maze.IDS();
+            maze.draw_maze();
+
             Console.ReadLine();
         }
     }
