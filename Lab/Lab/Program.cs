@@ -10,13 +10,21 @@ namespace Lab
     {
         static void Main(string[] args)
         {
-            Maze maze = new Maze(20);
+            //Maze maze = new Maze(20);
 
-            maze.generate_maze();
-            maze.draw_maze();
+            //maze.generate_maze();
+            //maze.draw_maze();
 
-            maze.IDS();
-            maze.draw_maze();
+            //maze.IDS();
+            //maze.draw_maze();
+
+
+            Maze maze2 = new Maze(20);
+            maze2.generate_maze();
+            maze2.draw_maze();
+
+            Console.WriteLine( Convert.ToString(maze2.RDFS()));
+            maze2.draw_maze();
 
             Console.ReadLine();
         }
