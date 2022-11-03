@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 
+using System.
 
 namespace Lab
 {
@@ -267,12 +268,12 @@ namespace Lab
             Console.WriteLine();
         }
 
-        private bool DLS(int max_depth)
+        private bool _DLS(int max_depth)
         {
-            return recursive_DLS(max_depth, 0, maze[0,0]);
+            return _recursive_DLS(max_depth, 0, maze[0,0]);
         }
 
-        private bool recursive_DLS(int max_depth, int depth, Node cur)
+        private bool _recursive_DLS(int max_depth, int depth, Node cur)
         {
             if (cur == null || depth >= max_depth)
             {
@@ -289,7 +290,7 @@ namespace Lab
                 {
                     depth++;
                     cur.isPath = true;
-                    if(recursive_DLS(max_depth, depth, childe))
+                    if(_recursive_DLS(max_depth, depth, childe))
                     {
                         return true;
                     }
@@ -301,19 +302,46 @@ namespace Lab
             return false;
         }
 
-        public void IDS()
+        public bool IDS()
         {
             int depth = 0;
             bool result = false;
             while (true)
             {
-                result = DLS(depth);
+                result = _DLS(depth);
                 if (result!=false)
                 {
-                    return;
+                    make_false();
+                    return result;
                 }
                 depth++;
             }
+        }
+
+        private double _funk(Node cur)
+        {
+            double estimation;
+
+            estimation = Math.Sqrt(Math.Pow(2, Convert.ToDouble(cur.corde[0]) - Convert.ToDouble(finish.corde[0])) + Math.Pow(2, Convert.ToDouble(cur.corde[1]) - Convert.ToDouble(finish.corde[1])));
+
+            return estimation;
+        }
+
+        private bool _recursive_RDFS(Node cur)
+        {
+            if (cur == null)
+            {
+                return false;
+            }
+            foreach (Node child in cur.children)
+            {
+
+            }
+        }
+
+        public bool RDFS()
+        {
+
         }
     }
 }
