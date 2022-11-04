@@ -332,7 +332,7 @@ namespace Lab
 
         private double _funk(Node cur, int g)
         {
-            return h(cur);
+            return h(cur) + g;
         }
 
         private double h(Node node)
@@ -375,7 +375,19 @@ namespace Lab
             return alter;
         }
 
-        private bool _recursive_RDFS(Node cur, double fLimit, int g)
+        private void _find_alt_and_best(Node node, ref int best, ref int alt)
+        {
+            for (int i = 0; i < node.children.Count; i++)
+            {
+                if (node.children[best].f >= node.children[i].f)
+                {
+                    alt = best;
+                    best = i;
+                }
+            }
+        }
+
+        private bool _recursive_RDFS(Node cur, ref double fLimit, int g)
         {
             //cur.wached = true;
             //if(g == 10000)
@@ -390,6 +402,7 @@ namespace Lab
             if (cur.children.Count == 0)
             {
                 cur.isPath = false;
+                //cur.wached = true;
                 return false;
             }
             foreach (Node child in cur.children)
@@ -398,43 +411,50 @@ namespace Lab
                 child.f = _funk(child, g+1);
             }
 
-            while (true)
+            bool result = false;
+
+            while (result == false)
             {
                 //if (cur._unwatched_childrens() == 0)
                 //{
                 //    cur.isPath = false;
                 //    return false;
                 //}
-                Node best = _find_best(cur);
-                if (fLimit < best.f)
+                //Node best = _find_best(cur);
+                int best = 0;
+                int alt = 0;
+                _find_alt_and_best(cur, ref best, ref alt);
+
+                if (fLimit < cur.children[best].f)
                 {
                     //cur.wached = false;
                     cur.isPath = false;
-                    cur.f = best.f;
+                    fLimit = cur.children[best].f;
                     return false;
                 }
-                Node alter = new Node(); 
-                if (cur.children.Count != 1)
-                {
-                    alter = _find_alternative(cur, best);
-                }    
+                //Node alter = new Node(); 
+                //if (cur.children.Count != 1)
+                //{
+                //    alter = _find_alternative(cur, best);
+                //}    
                 
 
                 cur.isPath = true;
                 Console.Clear();
                 draw_maze();
                 Thread.Sleep(700);
-                
-                bool result = _recursive_RDFS(best, Math.Min(alter.f, fLimit), g+1);
 
-                if (result != false)    
-                    return result;
+                fLimit = cur.children[alt].f;
+                result = _recursive_RDFS(cur.children[best], ref fLimit, g+1);
+                cur.children[best].f = fLimit;
             }
+            return result;
         }
 
         public bool RDFS()
         {
-            return _recursive_RDFS(maze[0,0], int.MaxValue, 0);
+            double fLimit = int.MaxValue;
+            return _recursive_RDFS(maze[0,0], ref fLimit, 0);
         }
     }
 }
