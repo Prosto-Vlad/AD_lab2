@@ -19,11 +19,11 @@ namespace Lab
             //maze.draw_maze();
 
 
-            Maze maze2 = new Maze(20);
+            Maze maze2 = new Maze(10);
             maze2.generate_maze();
             maze2.draw_maze();
 
-            Console.WriteLine( Convert.ToString(maze2.RDFS()));
+            Console.WriteLine( Convert.ToString(maze2.RDFS().succes));
             maze2.draw_maze();
 
             Console.ReadLine();
