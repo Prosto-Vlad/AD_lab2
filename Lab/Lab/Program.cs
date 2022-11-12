@@ -10,22 +10,52 @@ namespace Lab
     {
         static void Main(string[] args)
         {
-            //Maze maze = new Maze(20);
+            string answ;
+            int num, count, size;
 
-            //maze.generate_maze();
-            //maze.draw_maze();
+            Console.WriteLine("Which algoritm you want? ids/rbfs");
+            answ = Console.ReadLine();
 
-            //maze.IDS();
-            //maze.draw_maze();
+            Console.WriteLine("How much maze you want generate?");
+            count = Convert.ToInt32(Console.ReadLine());
 
+            Console.WriteLine("Maze size?");
+            size = Convert.ToInt32(Console.ReadLine());
+            switch (answ)
+            {
+                case "ids":
+                    for (int i = 0; i < count; i++)
+                    {
+                        num = i + 1;
+                        Console.WriteLine();
+                        Console.WriteLine("Maze №" + num);
 
-            Maze maze2 = new Maze(10);
-            maze2.generate_maze();
-            maze2.draw_maze();
+                        Maze maze = new Maze(size);
+                        maze.generate_maze();
 
-            Console.WriteLine( Convert.ToString(maze2.RDFS().succes));
-            maze2.draw_maze();
+                        maze.IDS();
+                        maze.draw_maze();
+                    }
+                    break;
+                case "rbfs":
+                    for (int i = 0; i < count; i++)
+                    {
+                        num = i + 1;
+                        Console.WriteLine();
+                        Console.WriteLine("Maze №" + num);
 
+                        Maze maze2 = new Maze(size);
+                        maze2.generate_maze();
+
+                        maze2.RDFS();
+                        maze2.draw_maze();
+                    }
+                    break;
+                default:
+                    Console.WriteLine("Error");
+                    break;
+            }
+            
             Console.ReadLine();
         }
     }
