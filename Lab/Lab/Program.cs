@@ -10,6 +10,7 @@ namespace Lab
     {
         static void Main(string[] args)
         {
+            Result res;
             string answ;
             int num, count, size;
 
@@ -33,8 +34,15 @@ namespace Lab
                         Maze maze = new Maze(size);
                         maze.generate_maze();
 
-                        maze.IDS();
+                        res = maze.IDS();
                         maze.draw_maze();
+
+                        Console.WriteLine("State - " + maze.GetStartCorde()[0] + ", " + maze.GetStartCorde()[1] + "; " + maze.GetFinishCorde()[0] + ", " + maze.GetFinishCorde()[1]);
+                        Console.WriteLine("Iterations - " + res.iterations);
+                        Console.WriteLine("Dead end - " + res.corner);
+                        Console.WriteLine("States count - " + res.cState);
+                        Console.WriteLine("States in memory - " + res.cStateInMemory);
+                        Console.WriteLine("Time - " + res.time);
                     }
                     break;
                 case "rbfs":
@@ -44,11 +52,18 @@ namespace Lab
                         Console.WriteLine();
                         Console.WriteLine("Maze №" + num);
 
-                        Maze maze2 = new Maze(size);
-                        maze2.generate_maze();
+                        Maze maze = new Maze(size);
+                        maze.generate_maze();
 
-                        maze2.RDFS();
-                        maze2.draw_maze();
+                        res = maze.RDFS();
+                        maze.draw_maze();
+
+                        Console.WriteLine("State - " + maze.GetStartCorde()[0] + ", " + maze.GetStartCorde()[1] + "; " + maze.GetFinishCorde()[0] + ", " + maze.GetFinishCorde()[1]);
+                        Console.WriteLine("Iterations - " + res.iterations);
+                        Console.WriteLine("Dead end - " + res.corner);
+                        Console.WriteLine("States count - " + res.cState);
+                        Console.WriteLine("States in memory - " + res.cStateInMemory);
+                        Console.WriteLine("Time - " + res.time);
                     }
                     break;
                 default:

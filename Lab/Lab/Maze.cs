@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
+using System.Diagnostics;
 
 
 
@@ -12,11 +13,9 @@ namespace Lab
 {
     class Maze
     {
-        public class Result
-        {
-            public bool succes = false;
-            public double fLimit;
-        }
+        private long _byteInGig = 1024 * 1024 * 1024;
+        private long _msIn30Min = 1800000;
+        private long _used_mem = sizeof(int) * 2 + sizeof(double) + sizeof(bool) * 6;
         private class Node
         {
             public bool wached = false;
@@ -36,6 +35,18 @@ namespace Lab
         private Node _finish = new Node();
         private Node[,] _maze;
         private int _size;
+
+        private Stopwatch time;
+
+        public int[] GetFinishCorde()
+        {
+            return _finish.corde;
+        }
+
+        public int[] GetStartCorde()
+        {
+            return _start.corde;
+        }
 
         //-----------Maze-----------//
         private List<Node> _get_neighbours(int y_cur, int x_cur)
@@ -107,22 +118,48 @@ namespace Lab
             _maze = new Node[this._size, this._size];
 
             _create_empty_maze();
+
+            time = new Stopwatch();
+            time.Start();
         }
 
         private void _create_empty_maze()
         {
+            Random rand = new Random();
+            //bool end;
+            //if (rand.Next(21) <= 5)
+            //{
+            //    end = false;
+            //    _finish.corde = new int[2] { int.MaxValue, int.MaxValue };
+            //}
+            //else
+            //{
+            //    end = true;
+            //}
+
+            if (rand.Next(2) == 0)
+            {
+                _start.corde = new int[2] { rand.Next(_size), 0 };
+                //if(end == true)
+                _finish.corde = new int[2] { rand.Next(_size), _size - 1 };
+            }
+            else
+            {
+                _start.corde = new int[2] { 0,rand.Next(_size) };
+                //if (end == true)
+                _finish.corde = new int[2] { _size - 1, rand.Next(_size) };
+            }
+
             for (int i = 0; i < this._size; i++)
             {
                 for (int j = 0; j < this._size; j++)
                 {
-                    if (i == 0 && j == 0)
+                    if (i == _start.corde[0] && j == _start.corde[1])
                     {
-                        _start.corde = new int[2] { 0, 0 };
                         _maze[i, j] = _start;
                     }
-                    else if (i == _size - 1 && j == _size - 1)
+                    else if (i == _finish.corde[0] && j == _finish.corde[1])
                     {
-                        _finish.corde = new int[2] { _size - 1, _size - 1 };
                         _maze[i, j] = _finish;
                     }
                     else
@@ -261,55 +298,110 @@ namespace Lab
         }
 
         //-----------DLS-----------//
-        private bool _DLS(int max_depth)
+        private Result _DLS(int max_depth, Result res)
         {
-            return _recursive_DLS(max_depth, 0, _maze[0, 0]);
+            return _recursive_DLS(max_depth, 0, _start, res);
         }
 
-        private bool _recursive_DLS(int max_depth, int depth, Node cur)
+        private Result _recursive_DLS(int max_depth, int depth, Node cur, Result res)
         {
-            if (cur == null || depth >= max_depth)
+            if (res.cStateInMemory * _used_mem > _byteInGig || time.ElapsedMilliseconds > _msIn30Min)
             {
-                return false;
+                res.failure = true;
+                res.cutOff = false;
+
+                return res;
             }
 
+            bool cutoff_occurred = false;
+            if (depth >= max_depth)
+            {
+                res.succes = false;
+                res.cutOff = true;
+                res.failure = false;
+                res.cStateInMemory--;
+                //res.corner++;
+                return res;
+            }
             List<Node> children = _find_children(cur);
+            if (children.Count == 0)
+            {
+                res.succes = false;
+                res.cStateInMemory--;
+                return res;
+            }
+
+            res.cState += children.Count;
+            res.cStateInMemory += children.Count;
 
             foreach (Node childe in children)
             {
                 if (childe.corde[0] == _finish.corde[0] && childe.corde[1] == _finish.corde[1])
                 {
                     cur.isPath = true;
-                    return true;
+                    res.succes = true;
+                    //res.cStateInMemory++;
+                    return res;
                 }
                 else
                 {
-                    depth++;
+                    //depth++;
+                    res.iterations++;
                     cur.isPath = true;
-                    if (_recursive_DLS(max_depth, depth, childe))
+                    res = _recursive_DLS(max_depth, depth+1, childe, res);
+                    if (res.succes)
                     {
-                        return true;
+                        return res;
+                    }
+                    else if (res.cutOff == true)
+                    {
+                        cutoff_occurred = true;
                     }
 
-                    cur.isPath = false;
+                   // cur.isPath = false;
                 }
             }
-            depth--;
-            return false;
+            res.cStateInMemory--;
+            //depth--;
+            cur.isPath = false;
+            if (cutoff_occurred == true)
+            {
+                res.succes = false;
+                return res;
+            }
+            else
+            {
+                res.failure = true;
+                res.succes = false;
+                return res;
+            }    
         }
 
-        public bool IDS()
+        public Result IDS()
         {
-            int depth = 0;
-            bool result = false;
+            int max_depth = 0;
+            Result result = new Result();
             while (true)
             {
-                result = _DLS(depth);
-                if (result != false)
+                result = _DLS(max_depth, result);
+                if (result.succes != false)
                 {
+                    time.Stop();
+                    result.time = time.ElapsedMilliseconds;
                     return result;
                 }
-                depth++;
+                else if(result.failure == true)
+                {
+                    time.Stop();
+                    result.time = time.ElapsedMilliseconds;
+                    result.corner++;
+                    return result;
+                }
+                result.corner++;
+                result.cutOff = false;
+                result.failure = false;
+                result.cStateInMemory = 0;
+                max_depth++;
             }
         }
 
@@ -372,20 +464,23 @@ namespace Lab
             return children;
         }
 
-        private Result _recursive_RDFS(Node cur,  double fLimit, int g)
+        private Result _recursive_RDFS(Node cur,  double fLimit, int g, Result result)
         {
+
+            result.cStateInMemory++;
             cur.isPath = true;
             List<Node> children = _find_children(cur);
-            Result result = new Result();
 
             if (cur.corde[0] == _finish.corde[0] && cur.corde[1] == _finish.corde[1])
             {
                 result.succes = true;
+                //result.cStateInMemory++;
                 return result;
             }
             if (children.Count == 0)
             {
                 cur.isPath = false;
+                result.cStateInMemory--;
                 result.fLimit = int.MaxValue;
                 return result;
             }
@@ -398,8 +493,12 @@ namespace Lab
                 }
             }
 
+            result.cState+= children.Count;
+
             while (true)
             {
+                result.iterations++;
+
                 int best = 0;
                 int alt = 0;
                 _find_best(children, ref best);
@@ -408,6 +507,7 @@ namespace Lab
                 {
                     cur.isPath = false;
                     result.fLimit = children[best].f;
+                    result.cStateInMemory--;
                     return result;
                 }
 
@@ -417,11 +517,12 @@ namespace Lab
                     fLimit = Math.Min(fLimit, children[alt].f);
                 }
 
-                result = _recursive_RDFS(children[best], fLimit, g+1);
+                result = _recursive_RDFS(children[best], fLimit, g+1, result);
                 children[best].f = result.fLimit;
 
                 if (result.succes != false)
                 {
+                    //result.cStateInMemory++;
                     return result;
                 }
             }
@@ -430,8 +531,18 @@ namespace Lab
         public Result RDFS()
         {
             double fLimit = int.MaxValue;
-            _maze[0, 0].f = 0;
-            return _recursive_RDFS(_maze[0,0],  fLimit, 0);
+            _start.f = 0;
+            Result res = new Result();
+            res = _recursive_RDFS(_start, fLimit, 0, res);
+
+            if (res.succes == false)
+            {
+                res.corner++;
+            }
+
+            time.Stop();
+            res.time = time.ElapsedMilliseconds;
+            return res;
         }
     }
 }
